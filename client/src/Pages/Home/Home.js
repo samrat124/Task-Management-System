@@ -9,11 +9,6 @@ import { getTasks } from '../../utils/api'
 const Home = () => {
   const[state,setState]=useState([]);
   console.log(state);
-
-//   let fatchdata=()=>{
-//     let res=await fetch('https://attractive-underclothes-goat.cyclic.app/api/') 
-//   }
-
   useEffect(()=>{
     getTasks().then(res=>{setState(res.task);console.log(res.data)})
   },[])
