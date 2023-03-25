@@ -1,94 +1,226 @@
-const userModel = require('../Models/userModel');
-const { updateMovieRating } = require('./movieControllers');
 
-const registerUser =async({name,email,password})=>{
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { User } = require("../models/userModel");
 
-    //Checking User Already Exist Or Not
-    const foundUser = await userModel.findOne({email:email});
-    if(foundUser){
-        throw new Error('Already Registered');
-    }
+const Token = (user) => {
 
-    //Creating New User
-    const newUser = await userModel.create({name,email,password});
-    return newUser
+    // let {_id,name,email}=user;
+
+    const token = jwt.sign({ _id: user._id }, "pranav122");
+
+    return token;
 
 }
 
+const Register = async (req, res, next) => {
 
-const loginUser =async({email,password})=>{
+    try {
 
-    //Checking User Exist Or Not
-    const foundUser = await userModel.findOne({email:email});
-    if(!foundUser){
-        throw new Error('User Not Found');
-    }
+        let { name, email, password } = req.body;
 
-    if(foundUser.password!=password){
-        throw new Error('Wrong Password');
-    }
+        let user = await User.findOne({ email });
 
-    return foundUser
-
-}
-
-const addTask =async({taskId,status},userId)=>{
-
-    //Checking User Exist Or Not
-    const foundUser = await userModel.findOne({_id:userId});
-    if(!foundUser){
-        throw new Error('User Not Found');
-    }
-
-    const userTasks = foundUser.userTasks || [];
-    let foundIndex;
-    userTasks.forEach((ele,idx)=>{
-        if(ele.taskId==taskId){
-            foundIndex=idx;
-            return;
+        if (user) {
+            return res.status(500).send({
+                success: false,
+                message: "email id already exist"
+            })
         }
-    })
 
-    if(foundIndex){
-        throw new Error('Already Rated Movie');
+        password = bcrypt.hashSync(password);
+
+        user = await User.create({
+            name, email, password, avatar: {
+
+                public_id: "Sample_id",
+                url: "Sample url"
+
+            }
+        });
+
+        const token = Token(user);
+
+        let options = { expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), httpOnly: true, sameSite: "none", secure: true };
+
+
+        return res.cookie("token", token, options).status(201).send({
+            success: true,
+            message: "Registration Successful",
+            token,
+            user
+        })
+
+
+
+
     }
 
-    userTasks.push({taskId,status});
-    const updatedUser = await userModel.findOneAndUpdate({_id:userId},{userTasks});
-    await updateMovieRating(true,taskId,status);
-    return updatedUser
+    catch (err) {
+
+        return res.status(500).send({
+            message: err.message
+        });
+
+
+    }
+
 
 }
 
-const deleteRating =async({taskId},userId)=>{
+const login = async (req, res, next) => {
 
-    //Checking User Exist Or Not
-    const foundUser = await userModel.findOne({_id:userId});
-    if(!foundUser){
-        throw new Error('User Not Found');
-    }
+    try {
 
-    const userTasks = foundUser.userTasks|| [];
-    let foundIndex;
-    
-    for(let i=0;i<userTasks.length;i++){
-        if(userTasks[i].taskId==taskId){
-            foundIndex=i;
-            break;
+        let { email, password } = req.body;
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+
+            return res.status(401).send({
+                success: false,
+                message: "email id not exist"
+            })
+
         }
+
+        if (!bcrypt.compareSync(password, user.password)) {
+            return res.status(401).send({
+                success: false,
+                message: "password wrong"
+            })
+
+        }
+
+        const token = Token(user);
+
+        let options = { expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), httpOnly: true };
+
+
+
+
+        return res.status(201).cookie("token", token, options).send({
+            success: true,
+            message: "Login Successful",
+            token,
+            user
+        })
+
+    } catch (err) {
+
+        return res.status(500).send({
+            message: err.message
+        })
+
     }
 
 
-    if(foundIndex==undefined){
-        throw new Error('Movie Not Found');
-    }
-
-    await updateTaskStatus(false,taskId,userTasks[foundIndex].status);
-    userTasks.splice(foundIndex,1);
-    // console.log(ratedMovies)
-    const updatedUser = await userModel.findOneAndUpdate({_id:userId},{userTasks});
-    return updatedUser;
 
 }
 
-module.exports = {registerUser,loginUser,addTask,deleteRating};
+
+const logged_out = async (req, res, next) => {
+
+    try {
+
+        return res.status(200).cookie("token", null, { expires: new Date(Date.now()), httpOnly: true }).send({
+
+            success: true,
+            message: "Logged out"
+
+        })
+
+
+    } catch (err) {
+
+        return res.status(500).send({
+            success: false,
+            message: err.message
+        })
+
+    }
+
+
+
+}
+
+const update_password = async (req, res, next) => {
+
+    try {
+
+        if (!old_password || !new_password) {
+            return res.status(401).send({
+                success: false,
+                message: "Please Provide old password and new password"
+            })
+        }
+
+        let { old_password, new_password } = req.body;
+
+        let user = await User.findById(req.user._id);
+
+        if (!bcrypt.compareSync(old_password, user.password)) {
+
+            return res.status(401).send({
+                success: false,
+                message: "old password wrong"
+            })
+        }
+
+        let password_new = bcrypt.hashSync(new_password);
+
+        user.password = password_new;
+
+        user.save();
+
+        return res.status(201).send({
+            success: true,
+            message: "password updated successfully"
+        })
+
+
+    } catch (err) {
+
+        return res.status(500).send({
+            success: false,
+            message: err.message
+        })
+
+    }
+
+
+}
+const update_profile = async (req, res, next) => {
+
+    try {
+
+        let { name, email } = req.body;
+
+        let user = await User.findById(req.user._id);
+
+        if (name) {
+            user.name = name
+        }
+        if (password) {
+            user.email = email
+        }
+        return res.status(201).send({
+            success: true,
+            message: "Profile Update Successfully"
+        })
+
+
+    } catch (err) {
+
+        return res.status(500).send({
+            success: false,
+            message: err.message
+        })
+
+    }
+}
+
+module.exports = {
+    Register, login, logged_out, update_password, update_profile
+}
