@@ -35,12 +35,17 @@ const Signup = () => {
 
     const signupHandler = (e) => {
         e.preventDefault();
+        closeModal()
         signUpAPI(form)
-            .then(res => {
-                if (res.data) {
-                    showAlert('Registred Sucessfully');
-                    setSignup(false, dispatch);
-                    setLogin(true, dispatch);
+        .then(res => {
+            console.log(res)
+            localStorage.setItem('token',res.token)
+            localStorage.setItem('success',res.success)
+            // setLogin(true, dispatch);
+            showAlert('Registred Sucessfully');
+            setSignup(false, dispatch);
+            if (res.data) {
+                     
                 } else {
                     showAlert(res.err);
                 }
@@ -57,7 +62,8 @@ const Signup = () => {
                     <input type='email' onChange={changeHandler} value={form.email} name='email' placeholder='Enter Your Mail' />
                     <input type='password' onChange={changeHandler} value={form.password} name='password' placeholder='Enter Password' />
                     <div>
-                        <button type='submit'>SignUp</button>
+                    <button onClick={closeModal}>Back</button>
+                        <button type='submit' >SignUp</button>
                     </div>
                 </form>
                 <i onClick={closeModal} id='closeModal' className="fa-solid fa-xmark"></i>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{useEffect} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setAuth, setLogin } from '../../Redux/Action';
 import { ToastContainer } from 'react-toastify';
@@ -8,8 +8,14 @@ import Login from '../../Pages/Login/Login';
 import Signup from '../../Pages/Signup/Signup';
 const Navbar = () => {
     const { showLogin, showSignup, isLogin, auth } = useSelector((store) => store);
+    console.log(showLogin)
+    console.log(showSignup)
+    console.log(isLogin)
+    console.log(auth)
+    let success=localStorage.getItem('success');
     const dispatch = useDispatch();
-
+    const istrue=useSelector((e)=>e.showLogin)
+    console.log(istrue);
     const loginHandler = () => {
         if (!isLogin) {
             setLogin(true, dispatch);
@@ -19,6 +25,14 @@ const Navbar = () => {
     const logoutHandler =()=>{
         setAuth({isLogin:false,details:null},dispatch);
     }
+    useEffect(()=>{
+    
+console.log(1);
+return ()=>{
+    localStorage.setItem("success",false);
+}
+
+    },[])
 
 
     return (
@@ -41,7 +55,7 @@ const Navbar = () => {
                         </div> : <div id='userInfo'>
                             <button className='iconButton' onClick={loginHandler}>
                                 <i className="fa-solid fa-arrow-right-to-bracket"></i>
-                                <span>Login</span>
+                                {isLogin?<span>Logout</span>:<span>Login</span> }
                             </button>
                             
                         </div>

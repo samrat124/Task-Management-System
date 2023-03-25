@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch,useSelector } from 'react-redux'
 import { setAuth, setLogin, setSignup } from '../../Redux/Action'
 import { loginAPI } from '../../utils/api';
 import { showAlert } from '../../utils/commonFunction';
@@ -10,7 +10,9 @@ const initalForm = {
     password:''
 }
 
+
 const Login = () => {
+    const istrue=useSelector((e)=>e.showLogin)
     const [form,setForm] = useState(initalForm);
 
     const dispatch = useDispatch();
@@ -31,6 +33,7 @@ const Login = () => {
     }
 
     const loginHandler=(e)=>{
+        closeModal();
         e.preventDefault();
         loginAPI(form)
         .then(res => {
@@ -38,6 +41,7 @@ const Login = () => {
                 showAlert('Login Sucessfully');
                 setLogin(false, dispatch);
                 setAuth({isLogin:true,details:res.data},dispatch);
+               
             } else {
                 showAlert(res.err);
             }
@@ -49,12 +53,15 @@ const Login = () => {
     return (
         <div id='loginMainContainer'>
             <div id='loginContainer'>
+                 
                 <h2>LogIn</h2>
                 <form onSubmit={loginHandler}>
                     <input type='email' name='email' onChange={changeHandler} value={form.email} placeholder='Enter Your Mail' />
                     <input type='password' name='password' onChange={changeHandler} value={form.password} placeholder='Enter Password' />
                     <div>
-                        <button type='submit'>LogIn</button>
+                        <button onClick={closeModal}>Back</button>
+                        
+                        <button type='submit' >Login</button>
                         <button onClick={goToSignUp} >Create Account</button>
                     </div>
                 </form>
