@@ -4,7 +4,11 @@ let apiURL='https://attractive-underclothes-goat.cyclic.app/api/'
 
 export const getTasks =async()=>{
     try{
-        const response = await fetch(apiURL+'findtask');
+        const response = await fetch(apiURL+'findtask',{method:"GET",headers:{
+        
+            token:localStorage.getItem("token")
+
+        }});
         const data = await response.json();
         return data;
     }catch(err){

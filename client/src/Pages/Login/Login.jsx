@@ -4,6 +4,7 @@ import { setAuth, setLogin, setSignup } from '../../Redux/Action'
 import { loginAPI } from '../../utils/api';
 import { showAlert } from '../../utils/commonFunction';
 import './Login.css';
+import {Link, useNavigate} from 'react-router-dom'
 
 const initalForm = {
     email:'',
@@ -17,6 +18,8 @@ const Login = () => {
 
     const dispatch = useDispatch();
 
+    let navigate=useNavigate();
+
     const closeModal = () => {
         setLogin(false, dispatch);
     }
@@ -25,6 +28,7 @@ const Login = () => {
         e.preventDefault();
         setLogin(false,dispatch);
         setSignup(true,dispatch);
+        navigate('/signup')
     }
 
     const changeHandler =(e)=>{
@@ -37,8 +41,9 @@ const Login = () => {
         e.preventDefault();
         loginAPI(form)
         .then(res => {
-            if (res.data) {
+            if (res.token) {
                 showAlert('Login Sucessfully');
+                localStorage.setItem("token",res.token);
                 setLogin(false, dispatch);
                 setAuth({isLogin:true,details:res.data},dispatch);
                
@@ -52,14 +57,15 @@ const Login = () => {
 
     return (
         <div id='loginMainContainer'>
+            
             <div id='loginContainer'>
-                 
-                <h2>LogIn</h2>
+            <h1 style={{color:'white',fontSize:'40px',letterSpacing:'2px'}}>Task Management System</h1>
+                <h2 style={{letterSpacing:'2px',marginBottom:'20px'}}>LogIn</h2>
                 <form onSubmit={loginHandler}>
                     <input type='email' name='email' onChange={changeHandler} value={form.email} placeholder='Enter Your Mail' />
                     <input type='password' name='password' onChange={changeHandler} value={form.password} placeholder='Enter Password' />
                     <div>
-                        <button onClick={closeModal}>Back</button>
+                        
                         
                         <button type='submit' >Login</button>
                         <button onClick={goToSignUp} >Create Account</button>

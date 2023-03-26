@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { useNavigate } from 'react-router-dom';
 import { setLogin, setsignup, setSignup } from '../../Redux/Action'
 import { signUpAPI } from '../../utils/api';
 import { showAlert } from '../../utils/commonFunction';
@@ -18,6 +19,8 @@ const Signup = () => {
     const [form, setForm] = useState(initialForm)
 
     const dispatch = useDispatch();
+
+    let navigate=useNavigate();
 
     const closeModal = () => {
         setSignup(false, dispatch);
@@ -39,9 +42,11 @@ const Signup = () => {
         signUpAPI(form)
         .then(res => {
             console.log(res)
+            if(res.token){
             localStorage.setItem('token',res.token)
-            localStorage.setItem('success',res.success)
-            // setLogin(true, dispatch);
+           navigate('/tasks')
+            }
+            
             showAlert('Registred Sucessfully');
             setSignup(false, dispatch);
             if (res.data) {
@@ -62,7 +67,11 @@ const Signup = () => {
                     <input type='email' onChange={changeHandler} value={form.email} name='email' placeholder='Enter Your Mail' />
                     <input type='password' onChange={changeHandler} value={form.password} name='password' placeholder='Enter Password' />
                     <div>
-                    <button onClick={closeModal}>Back</button>
+                    <button onClick={(e)=>{
+                     e.preventDefault();
+                     navigate('/');
+                     closeModal();
+                    }}>Back</button>
                         <button type='submit' >SignUp</button>
                     </div>
                 </form>

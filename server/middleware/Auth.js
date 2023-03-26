@@ -7,7 +7,7 @@ const Auth=async(req,res,next)=>{
 try{
     console.log(2)
 
-    const {token}=req.cookies;
+    const {token}=req.headers;
 
     if(!token)  
     {

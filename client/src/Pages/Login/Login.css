@@ -14,7 +14,7 @@
     background-color: #1b2636;
     padding: 2%;
     text-align: center;
-    width: 40%;
+    width: 60%;
     border-radius: 3px;
     position: relative;
     color: white;
@@ -31,7 +31,7 @@
     font-size: 2rem;
 }
 #loginContainer > form >input{
-    width: 100%;
+    width: 60%;
     padding: 3%;
     font-size: 1.1rem;
     margin: 1% auto;
@@ -58,7 +58,7 @@
     background-color: #eff0f4;
     color: #131a28;
     font-weight: 500;
-    width: 48%;
+    width: 28%;
 
 }
 #loginContainer > form >div{

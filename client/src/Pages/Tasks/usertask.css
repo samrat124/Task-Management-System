@@ -1,0 +1,24 @@
+.taskmain{
+    width:100%;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    align-items:center  ;
+}
+.tablemain{
+    width:60%;
+    margin:auto;
+    border:5px solid white;
+    min-height:500px;
+    margin-top:2%;
+}
+.heading{
+    width:100%;
+    display:flex;
+    justify-content:space-around;
+    border-bottom: 5px solid white;
+    height:50px;
+    align-items:center;
+    font-size:30px;
+    letter-spacing: 2px;
+}
